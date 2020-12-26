@@ -2,16 +2,12 @@ package ca.aerb.duktape4k.generator
 
 import java.lang.IllegalArgumentException
 
-class Targets(val apiFunction: CFunction) {
+class JniImplementation(val apiFunction: CFunction) {
 
-  private fun CFunction.jniName(): String {
-    val camelCase: String =
-      name.removePrefix("duk_").split("_")
-        .mapIndexed { index, word -> if (index == 0) word else word.capitalize() }
-        .joinToString(separator = "")
+  val camelCaseName: String =
+    apiFunction.name.removePrefix("duk_").toCamelCase()
 
-    return "Java_aerb_foo_DukContext_$camelCase"
-  }
+  private val jniName = "Java_aerb_foo_DukContext_$camelCaseName"
 
   private fun Arg.jniName(): String {
     if (type.name == "duk_context" && name == "ctx") {
@@ -40,8 +36,15 @@ class Targets(val apiFunction: CFunction) {
     }
   }
 
+  fun toKotlinImplementation(): KotlinImplementation {
+    return KotlinImplementation(this)
+  }
+
   init {
-    val jniArgs = mutableListOf(Arg("env", Type("JNIEnv", pointer = true)))
+    val jniArgs = mutableListOf(
+      Arg("env", Type("JNIEnv", pointer = true)),
+      Arg("obj", Type("jobject")),
+    )
 
     for (apiArg in apiFunction.args) {
       val jniType = apiArg.type.toJniType()
@@ -55,7 +58,7 @@ class Targets(val apiFunction: CFunction) {
     }
 
     jniFunctionHeader = CFunction(
-      name = apiFunction.jniName(),
+      name = jniName,
       returnType = apiFunction.returnType.toJniType(),
       args = jniArgs
     )

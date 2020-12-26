@@ -30,8 +30,15 @@ hello();
 print(this);
 print(Object.keys(this));
   """)
-  context.pushString("filename")
-  context.pcompile()
-  context.pcall(0)
+  println(context.peval())
+  println(context.pop())
+  println(context.getTopIndex().toUInt())
+  context.getGlobalString("hello")
+  println(context.getTopIndex().toUInt())
+  println(context.pcall(0))
+  println(context.getTopIndex().toUInt())
+  println(context.getType(0))
 
+
+  context.destroyHeap()
 }

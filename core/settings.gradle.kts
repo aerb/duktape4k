@@ -1,2 +1,2 @@
-rootProject.name = "duktape-playground"
+rootProject.name = "duktape4k-core"
 

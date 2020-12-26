@@ -6,8 +6,8 @@ data class CFunction(
   val args: List<Arg>
 ) {
 
-  fun toTargets(): Targets {
-    return Targets(this)
+  fun toJniImplementation(): JniImplementation {
+    return JniImplementation(this)
   }
 }
 
@@ -18,9 +18,18 @@ data class Type(
 ) {
   val noReturn: Boolean = name == "void" && !pointer
 
+  fun nameWithKeywords(): String {
+    return buildString {
+      if (keywords.isNotEmpty()) {
+        append(keywords.joinToString(separator = " ", postfix = " "))
+      }
+      append(name)
+    }
+  }
+
   fun cast(): String = buildString {
     append("(")
-    append(name)
+    append(nameWithKeywords())
     if (pointer) append("*")
     append(")")
   }
@@ -33,3 +42,5 @@ data class Type(
 data class Arg(val name: String, val type: Type)
 
 class Assignment(val to: Arg, val from: Arg)
+
+data class KArg(val name: String, val type: String)

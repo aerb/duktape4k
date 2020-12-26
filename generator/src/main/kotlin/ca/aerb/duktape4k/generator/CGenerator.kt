@@ -2,27 +2,22 @@ package ca.aerb.duktape4k.generator
 
 import java.io.File
 
-class CGenerator(private val functions: List<CFunction>) {
+object CGenerator {
+  private val JniDir = File("../jni")
+  private val AutogenFile = File(JniDir, "duktape-jni-autogen.c")
 
-  fun generate() {
-    val supported = functions.filter {
-      it.returnType in SupportedReturn &&
-        it.args.all { arg ->
-          arg.type in SupportedArgs
-        }
-    }
-
-    val declarations = supported.map { it.toTargets() }.map { target ->
+  fun generate(jniImplementations: List<JniImplementation>) {
+    val declarations = jniImplementations.map { target ->
       val jniFunction = target.jniFunctionHeader
       val apiFunction = target.apiFunction
       buildString {
         append("JNIEXPORT ")
-        append(jniFunction.returnType.name)
+        append(jniFunction.returnType.nameWithKeywords())
         append(" JNICALL ")
         append(jniFunction.name).append("(")
         appendLine()
         jniFunction.args.forEachIndexed { i, arg ->
-          append("  ").append(arg.type.name).append(" ")
+          append("  ").append(arg.type.nameWithKeywords()).append(" ")
           if (arg.type.pointer) {
             append("*")
           }
@@ -35,7 +30,7 @@ class CGenerator(private val functions: List<CFunction>) {
         append(") {")
         appendLine()
         if (!apiFunction.returnType.noReturn) {
-          append("  ").append(apiFunction.returnType.name).append(" ")
+          append("  ").append(apiFunction.returnType.nameWithKeywords()).append(" ")
           if (apiFunction.returnType.pointer) {
             append("*")
           }
@@ -85,23 +80,5 @@ class CGenerator(private val functions: List<CFunction>) {
         writer.appendLine(it)
       }
     }
-  }
-
-  companion object {
-    private val JniDir = File("../jni")
-    private val AutogenFile = File(JniDir, "duktape-jni-autogen.c")
-
-    private val SupportedReturn = listOf(
-      Type("void"),
-      Type("int"),
-      Type("int", setOf("unsigned"))
-    )
-
-    private val SupportedArgs = listOf(
-      Type("duk_context", pointer = true),
-      Type("duk_uint_t"),
-      Type("char", pointer = true),
-      Type("char", pointer = true, keywords = setOf("const"))
-    )
   }
 }

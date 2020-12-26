@@ -1,2 +1,2 @@
-rootProject.name = "generator"
+rootProject.name = "duktape4k-generator"
 

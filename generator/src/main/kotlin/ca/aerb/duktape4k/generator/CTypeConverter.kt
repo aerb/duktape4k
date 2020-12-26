@@ -21,6 +21,9 @@ object CTypeConverter {
           else -> cast(to, reference)
         }
       }
+      "int" -> {
+        cast(to, reference)
+      }
       "char" -> {
         require(to.pointer)
         when (from?.name) {
