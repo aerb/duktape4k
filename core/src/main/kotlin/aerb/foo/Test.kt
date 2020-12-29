@@ -2,6 +2,10 @@ package aerb.foo
 
 import java.nio.file.Path
 
+interface DuktapeCallbackHandler {
+  fun handleDuktapeCall(): Int
+}
+
 object Test {
   init {
     System.load(
@@ -11,8 +15,8 @@ object Test {
 
   private external fun createHeapDefault(): Long
 
-  fun newContext(): DukContext {
-    return DukContext(createHeapDefault())
+  fun newContext(handler: DuktapeCallbackHandler): DukContext {
+    return DukContext(createHeapDefault(), handler)
   }
 }
 
@@ -21,24 +25,41 @@ fun main() {
   val method = 1 shl 4
   val strict = 1 shl 5
 
-  val context = Test.newContext()
+  DuktapeEngine().use { engine ->
+    // engine.evaluate(
+    //   """
+    //   function hello() {
+    //     print('Hello world!');
+    //     return "hello!";
+    //   }
+    //   """.trimIndent()
+    // )
+    // repeat(3) {
+    //   println(engine.invokeGlobalFunction("hello"))
+    // }
 
-  context.pushString("""
-print('global');
-function hello() { print('Hello world!'); }
-hello();
-print(this);
-print(Object.keys(this));
-  """)
-  println(context.peval())
-  println(context.pop())
-  println(context.getTopIndex().toUInt())
-  context.getGlobalString("hello")
-  println(context.getTopIndex().toUInt())
-  println(context.pcall(0))
-  println(context.getTopIndex().toUInt())
-  println(context.getType(0))
+  }
 
 
-  context.destroyHeap()
+
+
+
+//   context.pushString("""
+// print('global');
+//
+// hello();
+// print(this);
+// print(Object.keys(this));
+//   """)
+//   println(context.peval())
+//   println(context.pop())
+//   println(context.getTopIndex().toUInt())
+//   context.getGlobalString("hello")
+//   println(context.getTopIndex().toUInt())
+//   println(context.pcall(0))
+//   println(context.getTopIndex().toUInt())
+//   println(context.getType(0))
+//
+//
+//   context.destroyHeap()
 }

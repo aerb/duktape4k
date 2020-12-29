@@ -1,7 +1,27 @@
 package aerb.foo
 
 @Suppress("unused")
-data class DukContext(private val pointer: Long) {
+data class DukContext(
+  private val pointer: Long,
+  private val handler: DuktapeCallbackHandler
+) {
+
+  init {
+    setupContext(pointer)
+  }
+
+  private external fun setupContext(contextPtr: Long)
+
+  private external fun pushJvmDelegateFunction(contextPtr: Long): Int
+
+  fun pushJvmDelegateFunction(): Int {
+    return pushJvmDelegateFunction(pointer)
+  }
+
+  fun invokedFromDuktape(): Int {
+    return handler.handleDuktapeCall()
+  }
+
   private external fun base64Decode(
     contextPtr: Long,
     idx: Int
